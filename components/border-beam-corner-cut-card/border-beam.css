@@ -1,0 +1,348 @@
+/* ================================================================
+   BorderBeamCornerCutCard — border-beam.css
+   All class names are prefixed with `bbc-` to avoid conflicts
+   with globals.css.
+   ================================================================
+
+   CSS custom properties (set inline by the component):
+     --bbc-corner-size  : diagonal cut depth in px  (default 20)
+     --bbc-beam-color   : primary beam color
+     --bbc-beam-color-b : secondary beam color (dual / gradient-sweep)
+     --bbc-duration     : primary beam rotation speed in seconds
+     --bbc-duration-b   : secondary beam rotation speed in seconds
+================================================================ */
+
+/* ---- Clip-path variants ------------------------------------- */
+
+.bbc-clip-br {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--bbc-corner-size, 20px)),
+    calc(100% - var(--bbc-corner-size, 20px)) 100%,
+    0 100%
+  );
+}
+
+.bbc-clip-bl {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    var(--bbc-corner-size, 20px) 100%,
+    0 calc(100% - var(--bbc-corner-size, 20px))
+  );
+}
+
+.bbc-clip-tr {
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--bbc-corner-size, 20px)) 0,
+    100% var(--bbc-corner-size, 20px),
+    100% 100%,
+    0 100%
+  );
+}
+
+.bbc-clip-tl {
+  clip-path: polygon(
+    var(--bbc-corner-size, 20px) 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 var(--bbc-corner-size, 20px)
+  );
+}
+
+.bbc-clip-all {
+  clip-path: polygon(
+    var(--bbc-corner-size, 20px) 0,
+    100% 0,
+    100% calc(100% - var(--bbc-corner-size, 20px)),
+    calc(100% - var(--bbc-corner-size, 20px)) 100%,
+    0 100%,
+    0 var(--bbc-corner-size, 20px)
+  );
+}
+
+/* ---- Wrapper ----------------------------------------------- */
+
+.bbc-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ---- Inner card -------------------------------------------- */
+
+.bbc-inner {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  background-color: var(--background, #050505);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Animations -------------------------------------------- */
+
+@keyframes bbc-spin-cw {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bbc-spin-ccw {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes bbc-pulse-opacity {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes bbc-rainbow-hue {
+  from {
+    filter: hue-rotate(0deg);
+  }
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* ---- Primary beam ------------------------------------------ */
+
+.bbc-beam {
+  position: absolute;
+  inset: -100%;
+  background: conic-gradient(
+    from 90deg at 50% 50%,
+    transparent 50%,
+    var(--bbc-beam-color, #ff00ff) 100%
+  );
+  animation: bbc-spin-cw var(--bbc-duration, 4s) linear infinite;
+}
+
+/* ---- Secondary beam (dual variant) ------------------------- */
+
+.bbc-beam-b {
+  position: absolute;
+  inset: -100%;
+  background: conic-gradient(
+    from 270deg at 50% 50%,
+    transparent 50%,
+    var(--bbc-beam-color-b, #00f3ff) 100%
+  );
+  animation: bbc-spin-ccw var(--bbc-duration-b, 6s) linear infinite;
+}
+
+/* ---- Variant overrides ------------------------------------- */
+
+/* gradient-sweep: wide blending beam from colorA → colorB */
+.bbc-variant-gradient-sweep .bbc-beam {
+  background: conic-gradient(
+    from 90deg at 50% 50%,
+    transparent 38%,
+    color-mix(in srgb, var(--bbc-beam-color, #ff00ff) 40%, transparent) 55%,
+    var(--bbc-beam-color, #ff00ff) 70%,
+    var(--bbc-beam-color-b, #00f3ff) 85%,
+    transparent 100%
+  );
+}
+
+/* rainbow: full neon spectrum cycling with hue rotation */
+.bbc-variant-rainbow .bbc-beam {
+  background: conic-gradient(
+    from 90deg at 50% 50%,
+    transparent 50%,
+    #ff00ff 60%,
+    #00f3ff 72%,
+    #39ff14 83%,
+    #ff9900 92%,
+    transparent 100%
+  );
+  animation:
+    bbc-spin-cw var(--bbc-duration, 4s) linear infinite,
+    bbc-rainbow-hue 4s linear infinite;
+}
+
+/* pulse: single beam that breathes in opacity while spinning */
+.bbc-variant-pulse .bbc-beam {
+  animation:
+    bbc-spin-cw var(--bbc-duration, 4s) linear infinite,
+    bbc-pulse-opacity 1.4s ease-in-out infinite;
+}
+
+/* ---- Glow intensity (box-shadow on inner card) ------------- */
+
+.bbc-glow-low .bbc-inner {
+  box-shadow: 0 0 8px
+    color-mix(in srgb, var(--bbc-beam-color, #ff00ff) 35%, transparent);
+}
+
+.bbc-glow-medium .bbc-inner {
+  box-shadow:
+    0 0 15px color-mix(in srgb, var(--bbc-beam-color, #ff00ff) 50%, transparent),
+    inset 0 0 10px
+      color-mix(in srgb, var(--bbc-beam-color, #ff00ff) 15%, transparent);
+}
+
+.bbc-glow-high .bbc-inner {
+  box-shadow:
+    0 0 28px var(--bbc-beam-color, #ff00ff),
+    0 0 50px color-mix(in srgb, var(--bbc-beam-color, #ff00ff) 40%, transparent),
+    inset 0 0 20px
+      color-mix(in srgb, var(--bbc-beam-color, #ff00ff) 25%, transparent);
+}
+
+/* ---- Icon box ---------------------------------------------- */
+
+.bbc-icon-box {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #000;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 1.5rem;
+  transition:
+    border-color 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.bbc-wrapper:hover .bbc-icon-box {
+  border-color: var(--bbc-beam-color, #ff00ff);
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--bbc-beam-color, #ff00ff) 50%, transparent),
+    inset 0 0 8px
+      color-mix(in srgb, var(--bbc-beam-color, #ff00ff) 20%, transparent);
+}
+
+/* ---- Icon -------------------------------------------------- */
+
+.bbc-icon {
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 300ms ease;
+}
+
+.bbc-wrapper:hover .bbc-icon {
+  color: var(--bbc-beam-color, #ff00ff);
+}
+
+/* ---- Title ------------------------------------------------- */
+
+.bbc-title {
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+  transition: text-shadow 300ms ease;
+}
+
+.bbc-wrapper:hover .bbc-title {
+  text-shadow:
+    0 0 10px var(--bbc-beam-color, #ff00ff),
+    0 0 20px var(--bbc-beam-color, #ff00ff);
+}
+
+/* ---- Description ------------------------------------------- */
+
+.bbc-description {
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.65;
+  flex-grow: 1;
+}
+
+/* ---- Size variants ----------------------------------------- */
+
+.bbc-size-sm .bbc-inner {
+  padding: 1.25rem;
+}
+.bbc-size-md .bbc-inner {
+  padding: 1.5rem;
+}
+.bbc-size-lg .bbc-inner {
+  padding: 2rem;
+}
+.bbc-size-xl .bbc-inner {
+  padding: 2.5rem;
+}
+
+.bbc-size-sm .bbc-icon-box {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+.bbc-size-md .bbc-icon-box {
+  width: 3rem;
+  height: 3rem;
+}
+.bbc-size-lg .bbc-icon-box {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+.bbc-size-xl .bbc-icon-box {
+  width: 4rem;
+  height: 4rem;
+}
+
+.bbc-size-sm .bbc-icon {
+  width: 1rem;
+  height: 1rem;
+}
+.bbc-size-md .bbc-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.bbc-size-lg .bbc-icon {
+  width: 2rem;
+  height: 2rem;
+}
+.bbc-size-xl .bbc-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.bbc-size-sm .bbc-title {
+  font-size: 0.875rem;
+}
+.bbc-size-md .bbc-title {
+  font-size: 1.125rem;
+}
+.bbc-size-lg .bbc-title {
+  font-size: 1.375rem;
+}
+.bbc-size-xl .bbc-title {
+  font-size: 1.625rem;
+}
+
+.bbc-size-sm .bbc-description {
+  font-size: 0.75rem;
+}
+.bbc-size-md .bbc-description {
+  font-size: 0.875rem;
+}
+.bbc-size-lg .bbc-description {
+  font-size: 1rem;
+}
+.bbc-size-xl .bbc-description {
+  font-size: 1.125rem;
+}
